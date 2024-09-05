@@ -1,20 +1,18 @@
 from pathlib import Path
 from decouple import config
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Определение пути к проекту
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# SECURITY WARNING: keep the secret key used in production secret!
+# Настройки безопасности
 SECRET_KEY = config('SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
+TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-# Application definition
+ALLOWED_HOSTS = []
 
+# Приложения Django
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -23,8 +21,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'orders',
+    'telegram_bot',
 ]
 
+# Средства посредников (middlewares)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -35,12 +35,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Основной URLconf
 ROOT_URLCONF = 'flower_delivery.urls'
 
+# Настройки шаблонов
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -53,9 +55,10 @@ TEMPLATES = [
     },
 ]
 
+# Настройки WSGI
 WSGI_APPLICATION = 'flower_delivery.wsgi.application'
 
-# Database
+# Настройки базы данных (по умолчанию SQLite)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -63,7 +66,7 @@ DATABASES = {
     }
 }
 
-# Password validation
+# Настройки аутентификации
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -79,18 +82,26 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
+# Настройки языка и времени
 LANGUAGE_CODE = 'ru-ru'
-
 TIME_ZONE = 'Europe/Moscow'
-
 USE_I18N = True
-
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
-#STATICFILES_DIRS = [BASE_DIR / 'static']
+# Статические файлы (CSS, JavaScript, изображения)
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# Default primary key field type
+# Путь для медиафайлов (если используются)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Настройки логина
+LOGIN_REDIRECT_URL = 'catalog'  # Перенаправление на страницу каталога после входа
+LOGOUT_REDIRECT_URL = 'login'  # Перенаправление на страницу логина после выхода
+
+# Настройка для хранения медиафайлов и других файлов
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Настройки для работы с Telegram ботом
+TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN')
