@@ -25,7 +25,7 @@ async def order(update: Update, context: CallbackContext) -> None:
         message = "Доступные цветы:\n"
         for flower in flowers:
             message += f"{flower.id}. {flower.name} - {flower.price} руб.\n"
-        message += "\nВведите /order [ID], чтобы заказать."
+        message += "\nВведите /order_flower [ID], чтобы заказать."
         await update.message.reply_text(message)
     else:
         await update.message.reply_text("На данный момент цветов нет в наличии.")
