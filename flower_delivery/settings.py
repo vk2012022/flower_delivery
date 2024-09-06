@@ -7,8 +7,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Настройки безопасности
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=True, cast=bool)
+
+# Токен старого бота
 TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN')
 
+# Токен и ID для нового бота администратора
+NEW_BOT_TOKEN = config('NEW_BOT_TOKEN')
+NEW_BOT_ADMIN_ID = config('NEW_BOT_ADMIN_ID')
 
 ALLOWED_HOSTS = []
 
@@ -24,6 +29,7 @@ INSTALLED_APPS = [
     'telegram_bot',
 ]
 
+# Остальные настройки...
 # Средства посредников (middlewares)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -102,6 +108,3 @@ LOGOUT_REDIRECT_URL = 'login'  # Перенаправление на стран�
 
 # Настройка для хранения медиафайлов и других файлов
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Настройки для работы с Telegram ботом
-TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN')
