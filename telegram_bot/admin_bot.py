@@ -23,6 +23,47 @@ async def notify_admin(message: str):
     except Exception as e:
         logger.error(f"Ошибка при отправке уведомления админу: {e}")
 
+        async def check_new_orders():
+            """Проверка всех новых заказов за последние 5 минут и отправка уведомлений админу"""
+            try:
+                logger.debug("Начало проверки новых заказов")
+                five_minutes_ago = now() - timedelta(minutes=5)
+                logger.debug(f"Ищем заказы, созданные после: {five_minutes_ago}")
+
+                # Получаем заказы за последние 5 минут
+                new_orders = await sync_to_async(list)(Order.objects.filter(created_at__gte=five_minutes_ago))
+                logger.debug(f"Найдено новых заказов: {len(new_orders)}")
+
+                if new_orders:  # Если есть новые заказы
+                    message = "Новые заказы за последние 5 минут:\n"
+                    for order in new_orders:
+                        logger.debug(f"Проверка заказа: {order.id}")
+                        already_notified = await sync_to_async(NotifiedOrder.objects.filter)(order=order)
+                        if not await sync_to_async(already_notified.exists)():
+                            # Извлекаем цветы, связанные с заказом
+                            flowers = await sync_to_async(list)(order.flowers.all())
+                            logger.debug(f"Цветы для заказа {order.id}: {flowers}")
+
+                            flower_info = ", ".join(
+                                [f"{flower.name} (ID: {flower.id})" if flower.name else f"ID: {flower.id}" for flower in
+                                 flowers])
+                            flower_info = flower_info if flower_info else "Цветы не указаны"
+
+                            # Добавляем информацию о заказе и цветах в сообщение
+                            message += f"Заказ {order.id}: {'Телеграм' if order.is_from_telegram else 'Сайт'}, Цветы: {flower_info}\n"
+                            logger.debug(f"Добавление заказа {order.id} в уведомление")
+
+                            # Создаем запись уведомленного заказа
+                            await sync_to_async(NotifiedOrder.objects.create)(order=order)
+
+                    # Отправляем уведомление админу, если есть новые заказы
+                    await notify_admin(message)
+                else:
+                    logger.debug("Новых заказов нет.")
+            except Exception as e:
+                logger.error(f"Ошибка при проверке новых заказов: {e}")
+
+
 async def check_new_orders():
     """Проверка всех новых заказов за последние 5 минут и отправка уведомлений админу"""
     try:
@@ -30,13 +71,35 @@ async def check_new_orders():
         # Получаем заказы за последние 5 минут
         new_orders = await sync_to_async(list)(Order.objects.filter(created_at__gte=five_minutes_ago))
 
+
+
         if new_orders:  # Если есть новые заказы
             message = "Новые заказы за последние 5 минут:\n"
             for order in new_orders:
+                logger.debug(f"Проверка заказа: {order.id}")
                 already_notified = await sync_to_async(NotifiedOrder.objects.filter)(order=order)
                 if not await sync_to_async(already_notified.exists)():
-                    message += f"Заказ {order.id}: {'Телеграм' if order.is_from_telegram else 'Сайт'}\n"
+                    # Извлекаем цветы, связанные с заказом
+                    flowers = await sync_to_async(list)(order.flowers.all())
+                    logger.debug(f"Цветы для заказа {order.id}: {flowers}")
+
+                    flower_info = ", ".join(
+                    [f"{flower.name} (ID: {flower.id})" if flower.name else f"ID: {flower.id}" for flower in
+                    flowers])
+                    flower_info = flower_info if flower_info else "Цветы не указаны"
+
+                    # Добавляем информацию о заказе и цветах в сообщение
+                    message += f"Заказ {order.id}: {'Телеграм' if order.is_from_telegram else 'Сайт'}, Цветы: {flower_info}\n"
+                    logger.debug(f"Добавление заказа {order.id} в уведомление")
+
+                    # Создаем запись уведомленного заказа
                     await sync_to_async(NotifiedOrder.objects.create)(order=order)
+
+
+
+
+
+
 
             # Отправляем уведомление админу, только если есть заказы
             if message != "Новые заказы за последние 5 минут:\n":  # Если были добавлены заказы в сообщение
