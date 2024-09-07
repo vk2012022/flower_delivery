@@ -112,23 +112,13 @@ async def check_new_orders():
     except Exception as e:
         logger.error(f"Ошибка при проверке новых заказов: {e}")
 
-async def start(update, context):
-    """Приветственное сообщение при запуске бота"""
-    await update.message.reply_text("Привет, администратор! Я сообщу тебе о новых заказах с сайта и Telegram.")
 
-async def status(update, context):
-    """Команда для проверки состояния бота"""
-    await update.message.reply_text("Бот работает и проверяет новые заказы каждые 5 минут.")
 
 def start_admin_bot():
     """Запуск бота для администратора"""
     logger.info("Запуск нового бота администратора")
 
     application = ApplicationBuilder().token(admin_bot_token).build()
-
-    # Добавляем обработчики команд
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("status", status))
 
     # Запуск бота
     application.run_polling()
