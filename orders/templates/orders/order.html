@@ -2,8 +2,24 @@
 {% block content %}
 <h2>Оформление заказа</h2>
 <p>Вы заказываете: {{ flower.name }} за {{ flower.price }} руб.</p>
-<form method="POST">
+<form method="POST" onsubmit="return checkOrderTime()">
     {% csrf_token %}
     <button type="submit" class="btn btn-success">Подтвердить заказ</button>
 </form>
+
+<p id="time-error" style="color: red; display: none;">Заказы принимаются только с 9:00 до 18:00.</p>
+
+<script>
+    function checkOrderTime() {
+        const now = new Date();
+        const currentHour = now.getHours();
+
+        // Проверяем, находится ли время в диапазоне 9:00 - 18:00
+        if (currentHour < 9 || currentHour >= 18) {
+            document.getElementById('time-error').style.display = 'block';
+            return false; // Блокируем отправку формы
+        }
+        return true; // Разрешаем отправку формы
+    }
+</script>
 {% endblock %}
