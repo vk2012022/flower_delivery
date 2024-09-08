@@ -3,7 +3,7 @@ import django
 import asyncio
 import logging
 from telegram.ext import Application, CommandHandler
-from telegram_bot.handlers import start, order, order_flower, set_admin
+from telegram_bot.handlers import start, order, order_flower
 
 # Настройка логирования
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -26,7 +26,6 @@ async def main():
         application.add_handler(CommandHandler("start", start))
         application.add_handler(CommandHandler("order", order))
         application.add_handler(CommandHandler("order_flower", order_flower))
-        application.add_handler(CommandHandler("setadmin", set_admin))
         logging.debug("Обработчики команд добавлены")
 
         # Запуск бота

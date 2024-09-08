@@ -1,7 +1,7 @@
 import os
 import logging
 from telegram.ext import Application, CommandHandler
-from telegram_bot.handlers import start, order, order_flower, set_admin  # Импортируем остальные команды
+from telegram_bot.handlers import start, order, order_flower
 
 # Настраиваем логирование
 logging.basicConfig(
@@ -24,7 +24,6 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("order", order))
     application.add_handler(CommandHandler("order_flower", order_flower))
-    application.add_handler(CommandHandler("setadmin", set_admin))
 
     # Запускаем бота
     logger.info("Запуск бота...")

@@ -3,7 +3,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegisterForm
 from .models import Flower, Order
-from telegram_bot.handlers import notify_admin
 
 
 def register(request):
@@ -43,9 +42,6 @@ def order(request, flower_id):
 
         # Сообщение об успешном заказе
         messages.success(request, 'Заказ успешно создан!')
-
-        # Отправка уведомления администратору
-        notify_admin(f"Новый заказ на {flower.name} ({quantity} шт.) от {request.user.username}")
 
         return redirect('catalog')
 
