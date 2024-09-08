@@ -4,6 +4,10 @@
 <p>Вы заказываете: {{ flower.name }} за {{ flower.price }} руб.</p>
 <form method="POST" onsubmit="return checkOrderTime()">
     {% csrf_token %}
+    <div class="form-group">
+        <label for="quantity">Количество:</label>
+        <input type="number" name="quantity" id="quantity" min="1" value="1" class="form-control" required>
+    </div>
     <button type="submit" class="btn btn-success">Подтвердить заказ</button>
 </form>
 

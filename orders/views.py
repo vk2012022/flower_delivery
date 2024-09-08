@@ -27,13 +27,26 @@ def catalog(request):
 def order(request, flower_id):
     flower = Flower.objects.get(id=flower_id)
     if request.method == 'POST':
-        order = Order.objects.create(user=request.user)
+        # Получаем количество цветов из формы
+        quantity = int(request.POST.get('quantity', 1))  # Значение по умолчанию 1
+
+        # Создаем описание заказа с учетом количества
+        description = f"Заказ на {flower.name}, количество: {quantity} шт."
+
+        # Создаем заказ и сохраняем информацию
+        order = Order.objects.create(
+            user=request.user,
+            description=description
+        )
         order.flowers.add(flower)
         order.save()
+
+        # Сообщение об успешном заказе
         messages.success(request, 'Заказ успешно создан!')
 
-        # Отправка уведомления без контекста
-        notify_admin(f"Новый заказ на {flower.name} от {request.user.username}")
+        # Отправка уведомления администратору
+        notify_admin(f"Новый заказ на {flower.name} ({quantity} шт.) от {request.user.username}")
 
         return redirect('catalog')
+
     return render(request, 'orders/order.html', {'flower': flower})
