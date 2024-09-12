@@ -1,3 +1,4 @@
+import logging  # Импортируем модуль логирования
 from telegram import Update
 from telegram.ext import CallbackContext
 from orders.models import Flower, Order, AdminSettings
@@ -78,8 +79,8 @@ async def notify_admin(message: str, context: CallbackContext = None) -> None:
             if context:  # Если контекст передан (вызывается из бота)
                 await context.bot.send_message(chat_id=settings.admin_telegram_id, text=message)
             else:
-                print(f"Уведомление админу: {message}")  # Логируем уведомление для веб-части
+                logging.debug(f"Уведомление админу: {message}")
         else:
-            print("Администратор не настроен для получения уведомлений.")
+            logging.warning("Администратор не настроен для получения уведомлений.")
     except AdminSettings.DoesNotExist:
-        print("AdminSettings не существует. Администратор не настроен.")
+        logging.error("AdminSettings не существует. Администратор не настроен.")

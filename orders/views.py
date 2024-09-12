@@ -1,52 +1,45 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import sync_and_async_middleware
+from asgiref.sync import sync_to_async
 from .forms import UserRegisterForm
 from .models import Flower, Order
 from telegram_bot.handlers import notify_admin
 
-
-def register(request):
+@sync_and_async_middleware
+async def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Вы успешно зарегистрировались!')
-            return redirect('login')
+        if await sync_to_async(form.is_valid)():
+            await sync_to_async(form.save)()
+            await sync_to_async(messages.success)(request, 'Вы успешно зарегистрировались!')
+            return await sync_to_async(redirect)('login')
     else:
         form = UserRegisterForm()
-    return render(request, 'orders/register.html', {'form': form})
+    return await sync_to_async(render)(request, 'orders/register.html', {'form': form})
 
-
-def catalog(request):
-    flowers = Flower.objects.all()
-    return render(request, 'orders/catalog.html', {'flowers': flowers})
-
+@sync_and_async_middleware
+async def catalog(request):
+    flowers = await sync_to_async(list)(Flower.objects.all())
+    return await sync_to_async(render)(request, 'orders/catalog.html', {'flowers': flowers})
 
 @login_required
-def order(request, flower_id):
-    flower = Flower.objects.get(id=flower_id)
+@sync_and_async_middleware
+async def order(request, flower_id):
+    flower = await sync_to_async(Flower.objects.get)(id=flower_id)
+
     if request.method == 'POST':
-        # Получаем количество цветов из формы
-        quantity = int(request.POST.get('quantity', 1))  # Значение по умолчанию 1
-
-        # Создаем описание заказа с учетом количества
+        quantity = int(request.POST.get('quantity', 1))
         description = f"Заказ на {flower.name}, количество: {quantity} шт."
-
-        # Создаем заказ и сохраняем информацию
-        order = Order.objects.create(
+        order = await sync_to_async(Order.objects.create)(
             user=request.user,
             description=description
         )
-        order.flowers.add(flower)
-        order.save()
+        await sync_to_async(order.flowers.add)(flower)
+        await sync_to_async(order.save)()
 
-        # Сообщение об успешном заказе
-        messages.success(request, 'Заказ успешно создан!')
-
-        # Отправка уведомления администратору
         notify_admin(f"Новый заказ на {flower.name} ({quantity} шт.) от {request.user.username}")
+        return await sync_to_async(redirect)('catalog')
 
-        return redirect('catalog')
-
-    return render(request, 'orders/order.html', {'flower': flower})
+    return await sync_to_async(render)(request, 'orders/order.html', {'flower': flower})
