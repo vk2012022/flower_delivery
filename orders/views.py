@@ -5,7 +5,9 @@ from django.utils.decorators import sync_and_async_middleware
 from asgiref.sync import sync_to_async
 from .forms import UserRegisterForm
 from .models import Flower, Order
-from telegram_bot.handlers import notify_admin
+
+
+# from telegram_bot.handlers import notify_admin
 
 @sync_and_async_middleware
 async def register(request):
@@ -19,10 +21,12 @@ async def register(request):
         form = UserRegisterForm()
     return await sync_to_async(render)(request, 'orders/register.html', {'form': form})
 
+
 @sync_and_async_middleware
 async def catalog(request):
     flowers = await sync_to_async(list)(Flower.objects.all())
     return await sync_to_async(render)(request, 'orders/catalog.html', {'flowers': flowers})
+
 
 @login_required
 @sync_and_async_middleware
@@ -39,7 +43,9 @@ async def order(request, flower_id):
         await sync_to_async(order.flowers.add)(flower)
         await sync_to_async(order.save)()
 
-        notify_admin(f"Новый заказ на {flower.name} ({quantity} шт.) от {request.user.username}")
+        # Убираем уведомление для администратора
+        # notify_admin(f"Новый заказ на {flower.name} ({quantity} шт.) от {request.user.username}")
+
         return await sync_to_async(redirect)('catalog')
 
     return await sync_to_async(render)(request, 'orders/order.html', {'flower': flower})

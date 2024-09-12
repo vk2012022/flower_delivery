@@ -3,7 +3,9 @@ import django
 import asyncio
 import logging
 from telegram.ext import Application, CommandHandler
-from telegram_bot.handlers import start, order, order_flower, set_admin
+from telegram.error import Conflict  # Импортируем ошибку Conflict
+from telegram_bot.handlers import start, order, order_flower
+import time  # Для ожидания
 
 # Настройка логирования
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -26,14 +28,20 @@ async def main():
         application.add_handler(CommandHandler("start", start))
         application.add_handler(CommandHandler("order", order))
         application.add_handler(CommandHandler("order_flower", order_flower))
-        application.add_handler(CommandHandler("setadmin", set_admin))
         logging.debug("Обработчики команд добавлены")
 
-        # Запуск бота
-        logging.debug("Запуск бота через run_polling")
-        await application.run_polling()
+        # Попытка запустить бота с ожиданием в случае конфликта
+        while True:
+            try:
+                logging.debug("Запуск бота через run_polling")
+                await application.run_polling()
+                logging.debug("Бот завершил работу")
+                break  # Если бот успешно запустился, выходим из цикла
 
-        logging.debug("Бот завершил работу")
+            except Conflict:
+                logging.error("Конфликт: бот уже запущен другим процессом. Ожидание...")
+                time.sleep(10)  # Ждем 10 секунд перед повторной попыткой
+
     except Exception as e:
         logging.error(f"Ошибка во время работы бота: {e}")
         raise
